@@ -66,6 +66,7 @@ def store(frame_list, tube_bbox, video_id, utterance, person_id, start, end, vid
                                             image_shape=args.image_shape, min_size=args.min_size, 
                                             increase_area=args.increase)
     if out is None:
+        print("store empty")
         return []
 
     start += round(chunk_start * REF_FPS)
@@ -124,10 +125,12 @@ def crop_video(person_id, video_id, video_path, args):
 
 def download(video_id, args):
     video_path = os.path.join(args.video_folder, video_id + ".mp4")
+    if os.path.exists(video_path):
+        return video_path
     subprocess.call([args.youtube, '-f', "''best/mp4''", '--write-auto-sub', '--write-sub',
                      '--sub-lang', 'en', '--skip-unavailable-fragments',
                      "https://www.youtube.com/watch?v=" + video_id, "--output",
-                     video_path], stdout=DEVNULL, stderr=DEVNULL)
+                     video_path])#, stdout=DEVNULL, stderr=DEVNULL)
     return video_path
 
 
@@ -170,11 +173,13 @@ def run(params):
     # update the config options with the config file
     if args.estimate_bbox:
         import face_alignment
-        fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._2D, flip_input=False)
+        fa = face_alignment.FaceAlignment(face_alignment.LandmarksType.TWO_D, flip_input=False)
     video_folder = os.path.join(args.annotations_folder, person_id)
+    print("Processing %s" % person_id)
     
     chunks_data = []
     for video_id in os.listdir(video_folder):
+        print("Processing video_id %s" % video_id)
         intermediate_files = []
         try:
             if args.download:

@@ -70,6 +70,7 @@ def crop_bbox_from_frames(frame_list, tube_bbox, min_frames=16, image_shape=(256
     height = bot - top
     # Filter if it is too small
     if max(width, height) < min_size:
+        print("oooops, too small %fx%f" % (width, height))
         return None, None
     
     if aspect_preserving:
